@@ -32,5 +32,5 @@ jobs:
         working-directory: deployment
 
       - name: Deploy function code
-        run: aws lambda update-function-code --function-name POC-ServerlessImageHandle-BackEndImageHandlerLambd-h2yJWH02kKat --zip-file ./regional-s3-assets/image-handler.zip --publish
+        run: aws lambda update-function-code --function-name POC-ServerlessImageHandle-BackEndImageHandlerLambd-h2yJWH02kKat --zip-file fileb://`pwd`/regional-s3-assets/image-handler.zip --publish
         working-directory: deployment
