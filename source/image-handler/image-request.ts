@@ -127,7 +127,7 @@ export class ImageRequest {
       const metadata = await sharp(originalImage.originalImage).metadata();
 
 
-      console.info("Siyanat orifinal metadata", JSON.stringify(metadata))
+      console.info("Siyanat original metadata", JSON.stringify(metadata))
 
       imageRequestInfo = { ...imageRequestInfo, ...originalImage };
 
@@ -138,7 +138,8 @@ export class ImageRequest {
         imageRequestInfo.contentType === ContentTypes.GIF &&
         imageRequestInfo.edits &&
         Object.keys(imageRequestInfo.edits).length > 0 && imageRequestInfo.edits.resize) {
-            if(metadata.size < GIF_EDIT_LIMIT){
+          console.info("Siyanat edited metadata")
+            /* if(metadata.size < GIF_EDIT_LIMIT){
             let resize = imageRequestInfo.edits.resize
             console.info("Siyanat edited metadata", JSON.stringify(resize))
             if(resize.width && resize.height){
@@ -152,7 +153,7 @@ export class ImageRequest {
           } else {
             imageRequestInfo.edits.resize.width =  null //
             imageRequestInfo.edits.resize.height =  null //
-          }
+          } */
         }
 
       //If the original image is SVG file and it has any edits but no output format, change the format to PNG.
