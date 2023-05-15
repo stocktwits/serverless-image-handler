@@ -121,7 +121,7 @@ export class ImageRequest {
       imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
 
       const originalImage = await this.getOriginalImage(imageRequestInfo.bucket, imageRequestInfo.key);
-      const metadata = await sharp(originalImage, options).metadata();
+      const metadata = await sharp(originalImage).metadata();
 
 
       console.info("Siyanat orifinal metadata", JSON.stringify(metadata))
