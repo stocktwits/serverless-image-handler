@@ -3,6 +3,7 @@
 
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
+import sharp from "sharp";
 
 import {
   ContentTypes,
@@ -120,11 +121,33 @@ export class ImageRequest {
       imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
 
       const originalImage = await this.getOriginalImage(imageRequestInfo.bucket, imageRequestInfo.key);
+      const metadata = await sharp(originalImage, options).metadata();
+
+
+      console.info("Siyanat orifinal metadata", JSON.stringify(metadata))
+
       imageRequestInfo = { ...imageRequestInfo, ...originalImage };
 
       imageRequestInfo.headers = this.parseImageHeaders(event, imageRequestInfo.requestType);
 
-      // If the original image is SVG file and it has any edits but no output format, change the format to PNG.
+      // If the original image is GIF file end edit diemsions exceeds original then use original
+      if (
+        imageRequestInfo.contentType === ContentTypes.GIF &&
+        imageRequestInfo.edits &&
+        Object.keys(imageRequestInfo.edits).length > 0 && imageRequestInfo.edits.resize) {
+            let resize = imageRequestInfo.edits.resize
+            console.info("Siyanat edited metadata", JSON.stringify(resize))
+            if(resize.width && resize.height){
+              if(resize.width > metadata.width){
+                imageRequestInfo.edits.resize.width = metadata.width
+              }
+              if(resize.height > metadata.height){
+                imageRequestInfo.edits.resize.height = metadata.height
+              }
+            }
+        }
+
+      //If the original image is SVG file and it has any edits but no output format, change the format to PNG.
       if (
         imageRequestInfo.contentType === ContentTypes.SVG &&
         imageRequestInfo.edits &&
@@ -245,6 +268,7 @@ export class ImageRequest {
         if (originalImage.Expires) {
           result.expires = new Date(originalImage.Expires).toUTCString();
         }
+
   
         if (originalImage.LastModified) {
           result.lastModified = new Date(originalImage.LastModified).toUTCString();
