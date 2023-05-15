@@ -24,7 +24,7 @@ import https from 'https';
 import http from 'http';
 import { URL } from "url";
 
-const GIF_EDIT_LIMIT = 6 * 1024 * 1024; //4 MB
+const GIF_EDIT_LIMIT = 1 * 1024 * 1024; //4 MB
 
 const MAX_IMAGE_SIZE = 6 * 1024 * 1024; //6 MB
 const ALLOWED_CONTENT_TYPES = [
