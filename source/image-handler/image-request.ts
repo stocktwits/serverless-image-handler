@@ -24,6 +24,8 @@ import https from 'https';
 import http from 'http';
 import { URL } from "url";
 
+const readonly GIF_EDIT_LIMIT = 4  * 1024 * 1024
+
 const MAX_IMAGE_SIZE = 6 * 1024 * 1024; //6 MB
 const ALLOWED_CONTENT_TYPES = [
   'image/jpeg',
@@ -45,6 +47,7 @@ type OriginalImageInfo = Partial<{
 
 export class ImageRequest {
   private static readonly DEFAULT_EFFORT = 4;
+  
 
   constructor(private readonly s3Client: S3, private readonly secretProvider: SecretProvider) {}
 
@@ -135,6 +138,7 @@ export class ImageRequest {
         imageRequestInfo.contentType === ContentTypes.GIF &&
         imageRequestInfo.edits &&
         Object.keys(imageRequestInfo.edits).length > 0 && imageRequestInfo.edits.resize) {
+            if(metadata.size < GIF_EDIT_LIMIT){
             let resize = imageRequestInfo.edits.resize
             console.info("Siyanat edited metadata", JSON.stringify(resize))
             if(resize.width && resize.height){
@@ -145,6 +149,9 @@ export class ImageRequest {
                 imageRequestInfo.edits.resize.height = metadata.height
               }
             }
+          } else {
+            imageRequestInfo.edits = null // not required just send back the original
+          }
         }
 
       //If the original image is SVG file and it has any edits but no output format, change the format to PNG.
