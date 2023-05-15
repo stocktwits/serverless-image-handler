@@ -150,7 +150,8 @@ export class ImageRequest {
               }
             }
           } else {
-            imageRequestInfo.edits = null // not required just send back the original
+            imageRequestInfo.edits.resize.width =  null //
+            imageRequestInfo.edits.resize.height =  null //
           }
         }
 
