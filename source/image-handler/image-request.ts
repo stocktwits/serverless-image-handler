@@ -24,7 +24,7 @@ import https from 'https';
 import http from 'http';
 import { URL } from "url";
 
-const GIF_EDIT_LIMIT = 1 * 1024 * 1024; //1 MB
+const GIF_EDIT_LIMIT = 0.5 * 1024 * 1024; // 500KB
 
 const MAX_IMAGE_SIZE = 6 * 1024 * 1024; //6 MB
 const ALLOWED_CONTENT_TYPES = [
@@ -618,7 +618,8 @@ export class ImageRequest {
               let resize = imageRequestInfo.edits.resize
               console.info("Siyanat edited metadata", JSON.stringify(resize))
               if(resize.width && resize.height){
-                if(resize.width > metadata.width || resize.height > metadata.height){
+                if(this.shouldResize(resize.width, metadata.width) ||
+                this.shouldResize(resize.height,metadata.height)){
                   imageRequestInfo.edits.resize.width = metadata.width
                   imageRequestInfo.edits.resize.height = metadata.height
                 }
@@ -626,4 +627,18 @@ export class ImageRequest {
         }
       }
    }
+
+   /**
+    * When resize params are near to original dimensions it mostly leads to greater size gif  after resizing
+    * @param number
+    * @param reference
+    * @returns boolean based on condition
+    */
+
+   private  shouldResize(number: number, reference: number): boolean {
+    if(number === 0 || number === null) return true
+    if(number > reference) return true
+    const percentage = (number / reference) * 100;
+    return percentage >= 75;
+  }
 }
