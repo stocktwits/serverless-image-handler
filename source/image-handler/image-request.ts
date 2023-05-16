@@ -636,6 +636,8 @@ export class ImageRequest {
     */
 
    private  shouldResize(number: number, reference: number): boolean {
+    console.info("Siyanat number ", number)
+    console.info("Siyanat reference ", reference)
     if(number === 0 || number === null) return true
     if(number > reference) return true
     const percentage = (number / reference) * 100;
