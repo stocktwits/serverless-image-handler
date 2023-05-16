@@ -641,6 +641,6 @@ export class ImageRequest {
     if(number === 0 || number === null) return true
     if(number > reference) return true
     const percentage = (number / reference) * 100;
-    return percentage >= 75;
+    return percentage >= 75 || percentage <= 25;
   }
 }
