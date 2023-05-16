@@ -3,7 +3,7 @@
 
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
-import sharp from "sharp";
+import sharp, { Metadata } from "sharp";
 
 import {
   ContentTypes,
@@ -24,7 +24,7 @@ import https from 'https';
 import http from 'http';
 import { URL } from "url";
 
-const GIF_EDIT_LIMIT = 100; //4 MB
+const GIF_EDIT_LIMIT = 1 * 1024 * 1024; //1 MB
 
 const MAX_IMAGE_SIZE = 6 * 1024 * 1024; //6 MB
 const ALLOWED_CONTENT_TYPES = [
@@ -132,30 +132,8 @@ export class ImageRequest {
       imageRequestInfo = { ...imageRequestInfo, ...originalImage };
 
       imageRequestInfo.headers = this.parseImageHeaders(event, imageRequestInfo.requestType);
-
-      // If the original image is GIF file end edit diemsions exceeds original then use original
-      if (
-        imageRequestInfo.contentType === ContentTypes.GIF &&
-        imageRequestInfo.edits &&
-        Object.keys(imageRequestInfo.edits).length > 0 && imageRequestInfo.edits.resize) {
-          console.info("Siyanat edited metadata")
-            /* if(metadata.size < GIF_EDIT_LIMIT){
-            let resize = imageRequestInfo.edits.resize
-            console.info("Siyanat edited metadata", JSON.stringify(resize))
-            if(resize.width && resize.height){
-              if(resize.width > metadata.width){
-                imageRequestInfo.edits.resize.width = metadata.width
-              }
-              if(resize.height > metadata.height){
-                imageRequestInfo.edits.resize.height = metadata.height
-              }
-            }
-          } else {
-            imageRequestInfo.edits.resize.width =  null //
-            imageRequestInfo.edits.resize.height =  null //
-          } */
-        }
-
+      // If the if image type is gif then check and resizeDimensions if required
+      this.setResizeDimensionsforGifIfRequired(imageRequestInfo, metadata)
       //If the original image is SVG file and it has any edits but no output format, change the format to PNG.
       if (
         imageRequestInfo.contentType === ContentTypes.SVG &&
@@ -622,4 +600,30 @@ export class ImageRequest {
       }
     }
   }
+
+  /**
+   * Checks Gif Resize dimensions and resets to original dimension if any of it exceeds the original size
+   * @param event ImageRequestInfo, ImageMetadata
+   * @returns A promise.
+   * @throws Throws the error if validation is enabled and the provided signature is invalid.
+   */
+  private async setResizeDimensionsforGifIfRequired(imageRequestInfo: ImageRequestInfo, metadata: Metadata): Promise<void> {
+    //If the original image is GIF file end edit diemsions exceeds original then use original
+      if (
+        imageRequestInfo.contentType === ContentTypes.GIF &&
+        imageRequestInfo.edits &&
+        Object.keys(imageRequestInfo.edits).length > 0 && imageRequestInfo.edits.resize) {
+          console.info("Siyanat edited metadata")
+            if(metadata.size > GIF_EDIT_LIMIT){
+              let resize = imageRequestInfo.edits.resize
+              console.info("Siyanat edited metadata", JSON.stringify(resize))
+              if(resize.width && resize.height){
+                if(resize.width > metadata.width || resize.height > metadata.height){
+                  imageRequestInfo.edits.resize.width = metadata.width
+                  imageRequestInfo.edits.resize.height = metadata.height
+                }
+            }
+        }
+      }
+   }
 }
