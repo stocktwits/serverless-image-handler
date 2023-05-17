@@ -4,6 +4,9 @@
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
 import sharp, { Metadata } from "sharp";
+const { curly } = require('node-libcurl');
+
+
 
 import {
   ContentTypes,
@@ -219,6 +222,52 @@ export class ImageRequest {
         reject(error);
       });
     });
+  }
+
+  public async getImageBytesUsingCurl(url: string, depth: number) {
+    try {
+      const response = await curly.get(url, {
+        headers: {
+          userAgentHeader: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36',
+        },
+      });
+  
+      if (depth > MAX_REDIRECTS) {
+        throw new Error(`Failed to get the image: too many redirects`);
+      }
+  
+      if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
+        const redirectUrl = response.headers.location;
+        return getImageBytesUsingCurl(redirectUrl, depth + 1);
+      }
+  
+      if (response.statusCode !== 200) {
+        throw new Error(`Failed to get the image at ${url}. Status code: ${response.statusCode}`);
+      }
+  
+      const contentType = response.headers['content-type'].split(';')[0];
+      if (!ALLOWED_CONTENT_TYPES.includes(contentType)) {
+        throw new Error(`Invalid content type, only the following content types are allowed: ${ALLOWED_CONTENT_TYPES.join(', ')}`);
+      }
+  
+      const chunks = [];
+      let currentSize = 0;
+      response.on('data', (chunk: any) => {
+        chunks.push(chunk);
+        currentSize += chunk.length;
+        if (currentSize > MAX_IMAGE_SIZE) {
+          console.log('here', currentSize)
+          response.destroy();  
+          throw new Error(`The image is too large, the maximum allowed size is ${MAX_IMAGE_SIZE} bytes`);
+        }
+      });
+      response.on('end', () => {
+        return Buffer.concat(chunks);
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
   }
 
   /**
