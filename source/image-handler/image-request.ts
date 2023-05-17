@@ -238,7 +238,7 @@ export class ImageRequest {
   
       if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
         const redirectUrl = response.headers.location;
-        return getImageBytesUsingCurl(redirectUrl, depth + 1);
+        return this.getImageBytesUsingCurl(redirectUrl, depth + 1);
       }
   
       if (response.statusCode !== 200) {
