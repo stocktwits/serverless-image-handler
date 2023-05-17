@@ -26,6 +26,8 @@ import { URL } from "url";
 
 const GIF_EDIT_LIMIT = 0.5 * 1024 * 1024; // 500KB
 
+const userAgentHeader = ' User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
+
 const MAX_IMAGE_SIZE = 6 * 1024 * 1024; //6 MB
 const ALLOWED_CONTENT_TYPES = [
   'image/jpeg',
@@ -180,7 +182,7 @@ export class ImageRequest {
   public async getImageBytes(url: string, depth: number) {
     return new Promise((resolve, reject) => {
       const protocol = url.startsWith('https') ? https : http;
-      protocol.get(url, {headers: {'User-Agent': 'Mozilla/5.0'}}, response => {
+      protocol.get(url, {headers: {userAgentHeader}}, response => {
         if (depth > MAX_REDIRECTS) {
           reject(new Error(`Failed to get the image: too many redirects`));
           return;
