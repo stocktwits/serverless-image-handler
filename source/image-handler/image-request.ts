@@ -284,7 +284,7 @@ export class ImageRequest {
       const imageLocation = { Bucket: bucket, Key: key };
       let imageBuffer: Buffer;
       if (this.isValidURL(decodedURL)) {
-        let imgBytes = await this.getImageBytes(decodedURL, 0);
+        let imgBytes = await this.getImageBytesUsingCurl(decodedURL, 0);
         imageBuffer = Buffer.from(imgBytes as Uint8Array);
 
         result.contentType = this.inferImageType(imageBuffer);
