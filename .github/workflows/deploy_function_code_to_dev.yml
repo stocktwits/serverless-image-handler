@@ -51,5 +51,13 @@ jobs:
         with:
           name: image-handler.zip
 
+      - name: Confirm VIPS_DISC_THRESHOLD is set
+        run: |
+          ENV=`aws lambda get-function-configuration --function-name sih-dev-BackEndImageHandlerLambdaFunctionADEF7FF2-IuMiYd6KWpah`
+          if ! (echo $ENV | grep -q VIPS_DISC_THRESHOLD); then
+            ENV=`echo $ENV | jq 'del(.FunctionArn, .CodeSize, .LastModified, .CodeSha256, .Version, .State, .LastUpdateStatus, .PackageType, .Architectures) | .Environment.Variables |= (.VIPS_DISC_THRESHOLD = "512m")'`
+            aws lambda update-function-configuration --function-name sih-dev-BackEndImageHandlerLambdaFunctionADEF7FF2-IuMiYd6KWpah --cli-input-json "$ENV"
+          fi
+
       - name: Deploy function code
         run: aws lambda update-function-code --function-name sih-dev-BackEndImageHandlerLambdaFunctionADEF7FF2-IuMiYd6KWpah --zip-file fileb://`pwd`/image-handler.zip --publish
