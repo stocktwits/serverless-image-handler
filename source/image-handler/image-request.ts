@@ -224,7 +224,7 @@ export class ImageRequest {
     });
   }
 
-  public async getImageBytesUsingCurl(url: string, depth: number) {
+  /* public async getImageBytesUsingCurl(url: string, depth: number) {
     try {
       const response = await curly.get(url, {
         headers: {
@@ -238,7 +238,7 @@ export class ImageRequest {
   
       if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
         const redirectUrl = response.headers.location;
-        return this.getImageBytesUsingCurl(redirectUrl, depth + 1);
+        return this.getImageBytes(redirectUrl, depth + 1);
       }
   
       if (response.statusCode !== 200) {
@@ -269,7 +269,7 @@ export class ImageRequest {
       throw new Error(error);
     }
   }
-
+ */
   /**
    * Gets the original image from an Amazon S3 bucket.
    * @param bucket The name of the bucket containing the image.
@@ -284,7 +284,7 @@ export class ImageRequest {
       const imageLocation = { Bucket: bucket, Key: key };
       let imageBuffer: Buffer;
       if (this.isValidURL(decodedURL)) {
-        let imgBytes = await this.getImageBytesUsingCurl(decodedURL, 0);
+        let imgBytes = await this.getImageBytes(decodedURL, 0);
         imageBuffer = Buffer.from(imgBytes as Uint8Array);
 
         result.contentType = this.inferImageType(imageBuffer);
@@ -656,7 +656,6 @@ export class ImageRequest {
    * Checks Gif Resize dimensions and resets to original dimension if any of it exceeds the original size
    * @param event ImageRequestInfo, ImageMetadata
    * @returns A promise.
-   * @throws Throws the error if validation is enabled and the provided signature is invalid.
    */
   private async setResizeDimensionsforGifIfRequired(imageRequestInfo: ImageRequestInfo, metadata: Metadata): Promise<void> {
     //If the original image is GIF file end edit diemsions exceeds original then use original
