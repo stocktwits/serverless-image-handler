@@ -4,7 +4,7 @@
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
 import sharp, { Metadata } from "sharp";
-const { curly } = require('node-libcurl');
+
 
 
 
