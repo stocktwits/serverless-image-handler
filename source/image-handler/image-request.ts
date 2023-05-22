@@ -4,6 +4,8 @@
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
 import sharp, { Metadata } from "sharp";
+import fetch, { Headers as FetchHeaders, RequestInit } from 'node-fetch';
+
 
 import {
   ContentTypes,
@@ -216,6 +218,52 @@ export class ImageRequest {
   }
 
   /**
+   * This function is used to get the image bytes from the url using the libfetch library.
+   * @param url 
+   * @param depth 
+   * @returns buffer
+   */
+  public async getImageBytesUsingFetch(url: string, depth: number): Promise<Buffer> {
+    if (depth > MAX_REDIRECTS) {
+      throw new Error(`Failed to get the image: too many redirects`);
+    }
+  
+    const headers = new FetchHeaders({
+      'Host': new URL(url).hostname,
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
+    });
+  
+    const options: RequestInit = {
+      headers: headers,
+      redirect: 'manual',
+    };
+  
+    const response = await fetch(url, options);
+  
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+      const redirectUrl = response.headers.get('location') as string;
+      return this.getImageBytesUsingFetch(redirectUrl, depth + 1);
+    }
+  
+    if (!response.ok) {
+      throw new Error(`Failed to get the image at ${url}. Status code: ${response.status}`);
+    }
+  
+    const contentType = response.headers.get('content-type')?.split(';')[0];
+    if (!contentType || !ALLOWED_CONTENT_TYPES.includes(contentType)) {
+      throw new Error(`Invalid content type, only the following content types are allowed: ${ALLOWED_CONTENT_TYPES.join(', ')}`);
+    }
+  
+    const buffer = await response.buffer();
+    if (buffer.length > MAX_IMAGE_SIZE) {
+      throw new Error(`The image is too large, the maximum allowed size is ${MAX_IMAGE_SIZE} bytes`);
+    }
+    
+    return buffer;
+  }
+
+  /**
    * Gets the original image from an Amazon S3 bucket.
    * @param bucket The name of the bucket containing the image.
    * @param key The key name corresponding to the image.
@@ -229,7 +277,7 @@ export class ImageRequest {
       const imageLocation = { Bucket: bucket, Key: key };
       let imageBuffer: Buffer;
       if (this.isValidURL(decodedURL)) {
-        let imgBytes = await this.getImageBytes(decodedURL, 0);
+        let imgBytes = await this.getImageBytesUsingFetch(decodedURL, 0);
         imageBuffer = Buffer.from(imgBytes as Uint8Array);
 
         result.contentType = this.inferImageType(imageBuffer);
