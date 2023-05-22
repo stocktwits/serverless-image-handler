@@ -235,6 +235,7 @@ export class ImageRequest {
     });
   
     const options: RequestInit = {
+      method: 'GET',
       headers: headers,
       redirect: 'manual',
     };
