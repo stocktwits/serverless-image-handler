@@ -37,6 +37,8 @@ const ALLOWED_CONTENT_TYPES = [
   'image/gif',
   'image/webp',
   'image/svg+xml',
+  'binary/octet-stream',
+  'application/octet-stream'
 ];
 const MAX_REDIRECTS = 3;
 
@@ -237,7 +239,6 @@ export class ImageRequest {
     const options: RequestInit = {
       method: 'GET',
       headers: headers,
-      redirect: 'manual',
     };
   
     const response = await fetch(url, options);
