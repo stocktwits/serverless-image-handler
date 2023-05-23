@@ -314,7 +314,7 @@ export class ImageRequest {
       return result;
     } catch (error) {
       console.log("Siyanat",error)
-      //let status = error.status;
+      let status = error.status;
       let message = error.message;
       if (error.code === "NoSuchKey") {
         status = StatusCodes.NOT_FOUND;
