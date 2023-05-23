@@ -313,7 +313,7 @@ export class ImageRequest {
 
       return result;
     } catch (error) {
-      let status = StatusCodes.INTERNAL_SERVER_ERROR;
+      let status = error.status;
       let message = error.message;
       if (error.code === "NoSuchKey") {
         status = StatusCodes.NOT_FOUND;
