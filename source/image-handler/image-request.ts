@@ -313,8 +313,10 @@ export class ImageRequest {
 
       return result;
     } catch (error) {
-      console.log("Siyanat",JSON.stringify(error))
-      let status = error.status;
+      let status = StatusCodes.INTERNAL_SERVER_ERROR;
+      if(error.message.includes('403')) {
+        status = StatusCodes.FORBIDDEN
+      }
       let message = error.message;
       if (error.code === "NoSuchKey") {
         status = StatusCodes.NOT_FOUND;
