@@ -630,7 +630,7 @@ export class ImageRequest {
                       delete imageRequestInfo.edits
 =======
                     if(imageRequestInfo.edits){
-                      console.info("Siyanat Skipping edit")
+                      console.info("Siyanat edit json", JSON.stringify(imageRequestInfo.edits))
                       imageRequestInfo.edits["edit"] = "skip"
 >>>>>>> 1dbf3e5 ([GROWTH-1032] add edit string)
                     }
