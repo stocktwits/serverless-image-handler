@@ -4,10 +4,7 @@
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
 import sharp, { Metadata } from "sharp";
-<<<<<<< HEAD
 import axios from 'axios';
-=======
->>>>>>> 82b75d4 ([GROWTH-1032] limited gif resize)
 
 import {
   ContentTypes,
