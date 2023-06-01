@@ -689,6 +689,7 @@ export class ImageRequest {
                     // better to attempt to resize and check if it can still return a gif
                     if(metadata.size < GIF_ALLOWED_RESIZE){
                       delete imageRequestInfo.edits
+
                     }
                 }
            } 
