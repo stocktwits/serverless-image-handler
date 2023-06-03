@@ -682,14 +682,12 @@ export class ImageRequest {
                   imageRequestInfo.edits.resize.height = metadata.height
                   heightResized = true
                 }
-                if(widthResized && heightResized){
-                    // bypass resizing only if Gif size is < 4MB
-                    // otherwise 413 is practically guaranteed when converting to base64
-                    // better to attempt to resize and check if it can still return a gif
-                    if(metadata.size < GIF_ALLOWED_RESIZE){
+                /*if(widthResized && heightResized){
+                    if(imageRequestInfo.edits){
+                      console.info("Siyanat edit json", JSON.stringify(imageRequestInfo.edits))
                       delete imageRequestInfo.edits
                     }
-                }
+                }*/
            } 
       }
    }
