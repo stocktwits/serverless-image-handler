@@ -614,10 +614,6 @@ export class ImageRequest {
           let widthResized = false
           let heightResized = false
           let resize = imageRequestInfo.edits.resize
-<<<<<<< HEAD
-=======
-              console.info("Siyanat edited metadata", JSON.stringify(resize))
->>>>>>> cc675e5 ([GROWTH-1032] handle null)
               if(resize.width || resize.height){
                 if(this.shouldResize(resize.width, metadata.width)){
                   imageRequestInfo.edits.resize.width = metadata.width
