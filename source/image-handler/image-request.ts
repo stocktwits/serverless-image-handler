@@ -133,11 +133,7 @@ export class ImageRequest {
 
       imageRequestInfo.headers = this.parseImageHeaders(event, imageRequestInfo.requestType);
 
-<<<<<<< HEAD
       await this.setResizeDimensionsforGifIfRequired(originalImage, imageRequestInfo);
-=======
-      await this.setResizeDimensionsforGifIfRequired(originalImage,imageRequestInfo);
->>>>>>> c4536cd ([GROWTH-1032] await method)
 
       console.log("Siyanat imageRequestInfo.edits ", JSON.stringify(imageRequestInfo.edits))
 
