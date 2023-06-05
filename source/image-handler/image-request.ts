@@ -135,8 +135,7 @@ export class ImageRequest {
 
       await this.setResizeDimensionsforGifIfRequired(originalImage, imageRequestInfo);
 
-      console.log("Siyanat imageRequestInfo.edits ", JSON.stringify(imageRequestInfo.edits))
-
+    
       // If the original image is SVG file and it has any edits but no output format, change the format to PNG.
       if (
         imageRequestInfo.contentType === ContentTypes.SVG &&
@@ -682,12 +681,14 @@ export class ImageRequest {
                   imageRequestInfo.edits.resize.height = metadata.height
                   heightResized = true
                 }
-                /*if(widthResized && heightResized){
-                    if(imageRequestInfo.edits){
-                      console.info("Siyanat edit json", JSON.stringify(imageRequestInfo.edits))
+                if(widthResized && heightResized){
+                    // bypass resizing only if Gif size is < 4MB
+                    // otherwise 413 is practically guaranteed when converting to base64
+                    // better to attempt to resize and check if it can still return a gif
+                    if(metadata.size < GIF_ALLOWED_RESIZE){
                       delete imageRequestInfo.edits
                     }
-                }*/
+                }
            } 
       }
    }
