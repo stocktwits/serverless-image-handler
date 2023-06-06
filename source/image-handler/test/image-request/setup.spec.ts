@@ -835,11 +835,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16, quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 500,
             height: 250,
@@ -887,11 +883,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16,quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 300,
             height: 400,
@@ -939,11 +931,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16, quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 300,
             height: 400,
@@ -991,11 +979,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16, quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 500,
             height: 200,
@@ -1043,11 +1027,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16, quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 500,
             height: 400,
@@ -1066,50 +1046,6 @@ describe("setup", () => {
       });
       expect(imageRequestInfo).toEqual(expectedResult);
     });
-<<<<<<< HEAD
-=======
-    it("Should skip resize if height and width exceeds the original GIF dimension and gif is < 4mb", async () => {
-      // Arrange
-      const event = {
-        path: "/fit-in/700x700/filters:quality(70)/image.gif",
-      };
-      const image = fs.readFileSync("./test/image/25x15.png");
-      const sharpInstance: Partial<Sharp> = {
-        metadata: jest.fn().mockResolvedValue({ width: 500, height: 400, size: 1024 }),
-      };
-    
-      ((sharp as unknown) as jest.Mock).mockReturnValue(sharpInstance);
-      
-      mockAwsS3.getObject.mockImplementationOnce(() => ({
-        promise() {
-          return Promise.resolve({
-            ContentType: "image/gif",
-            Body: image,
-          });
-        },
-      }));
-
-      // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
-      const imageRequestInfo = await imageRequest.setup(event);
-      const expectedResult = {
-        requestType: "Thumbor",
-        bucket: "validBucket",
-        key: "image.gif",
-        headers: undefined,
-        originalImage: image,
-        cacheControl: "max-age=31536000,public",
-        contentType: "image/gif",
-      };
-
-      // Assert
-      expect(mockAwsS3.getObject).toHaveBeenCalledWith({
-        Bucket: "validBucket",
-        Key: "image.gif",
-      });
-      expect(imageRequestInfo).toEqual(expectedResult);
-    });
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
     it("Should match height if height is less than 25 percent and width is within range", async () => {
       // Arrange
       const event = {
@@ -1139,11 +1075,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16, quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 300,
             height: 400,
@@ -1191,11 +1123,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: {interFrameMaxError: 16, quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 300,
             height: 400,
@@ -1243,11 +1171,7 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16,quality:70},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 500,
             height: 250,
@@ -1295,7 +1219,6 @@ describe("setup", () => {
         bucket: "validBucket",
         key: "image.gif",
         edits: {
-<<<<<<< HEAD
           gif: { interFrameMaxError: 16,quality:70},
           resize: {
             width: 500,
@@ -1441,9 +1364,6 @@ describe("setup", () => {
         key: "image.gif",
         edits: {
           gif: { interFrameMaxError: 32,quality:49},
-=======
-          gif: { quality:70},
->>>>>>> 3364241 ([GROWTH-1032] unit tests)
           resize: {
             width: 500,
             height: 250,
