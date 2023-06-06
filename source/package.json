@@ -1,6 +1,7 @@
 {
   "name": "source",
   "version": "6.1.1",
+  "st-version": "1.0.0",
   "private": true,
   "st-version": "1.2.0",
   "description": "ESLint and prettier dependencies to be used within the solution",
