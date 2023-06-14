@@ -4,10 +4,7 @@
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
 import sharp, { Metadata } from "sharp";
-import fetch, { Headers as FetchHeaders, RequestInit } from 'node-fetch';
 import axios from 'axios';
-
-
 
 import {
   ContentTypes,
@@ -317,7 +314,6 @@ export class ImageRequest {
       return result;
     } catch (error) {
       let status = StatusCodes.INTERNAL_SERVER_ERROR;
-      //The following two is for external url
       if(error.message.includes('403')) {
         status = StatusCodes.FORBIDDEN
       }
@@ -325,7 +321,7 @@ export class ImageRequest {
         status = StatusCodes.NOT_FOUND
       }
       else if(error.message.includes('401')) {
-        status = StatusCodes.
+        status = StatusCodes.UNAUTHORIZED
       }
       let message = error.message;
       if (error.code === "NoSuchKey") {
