@@ -1,13 +1,8 @@
 {
   "name": "source",
   "version": "6.1.1",
-  "st-version": "1.0.0",
-  "private": true,
-<<<<<<< HEAD
   "st-version": "1.2.0",
-=======
-  "st-version": "1.1.0",
->>>>>>> 623bba6 (Rc v1.1.0 (#21))
+  "private": true,
   "description": "ESLint and prettier dependencies to be used within the solution",
   "license": "Apache-2.0",
   "author": "AWS Solutions",
