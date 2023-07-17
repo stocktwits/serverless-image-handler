@@ -115,12 +115,14 @@ export class ImageRequest {
           console.log("Content Type is NOT GIF");
         }
       } 
-      if (imageRequestInfo.contentType === ContentTypes.GIF) {
-        console.log("Adding .Outisde Gif");
-        imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
-      } else {
-        console.log("Content Type is NOT GIF");
-      }
+      
+    }
+
+    if (imageRequestInfo.contentType === ContentTypes.GIF) {
+      console.log("AddingMega .Outisde Gif");
+      imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
+    } else {
+      console.log("Content Type is NOT MEGA GIF");
     }
   }
 
