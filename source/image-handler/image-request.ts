@@ -107,6 +107,11 @@ export class ImageRequest {
           imageRequestInfo.edits[imageRequestInfo.outputFormat] = imageRequestInfo.edits[qualityKey];
           delete imageRequestInfo.edits[qualityKey];
         }
+
+        if (imageRequestInfo.outputFormat === ImageFormatTypes.GIF) {
+          console.log("Adding .gif({ interFrameMaxError: 16 }) to edits");
+          imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
+        }
       }
     }
   }
