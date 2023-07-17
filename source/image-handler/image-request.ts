@@ -111,7 +111,15 @@ export class ImageRequest {
         if (imageRequestInfo.contentType === ContentTypes.GIF) {
           console.log("Adding .gif({ interFrameMaxError: 16 }) to edits");
           imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
+        } else {
+          console.log("Content Type is NOT GIF");
         }
+      } 
+      if (imageRequestInfo.contentType === ContentTypes.GIF) {
+        console.log("Adding .Outisde Gif");
+        imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
+      } else {
+        console.log("Content Type is NOT GIF");
       }
     }
   }
