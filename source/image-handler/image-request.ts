@@ -112,12 +112,22 @@ export class ImageRequest {
     }
 
     if (imageRequestInfo.contentType === ContentTypes.GIF) {
-      console.log("AddingMega .Outisde Gif");
+      console.log("AddingMega .Outside Gif");
       console.log(JSON.stringify(imageRequestInfo.edits));
-      imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
-    } else {
+  
+      let gifQuality = imageRequestInfo.edits.gif.quality;
+      if(gifQuality >= 70){
+          imageRequestInfo.edits.gif.interFrameMaxError = 16;
+          console.log('GIF quality is 70 or above, so setting interFrameMaxError to 16');
+      } else {
+          imageRequestInfo.edits.gif.interFrameMaxError = 24;
+          console.log('GIF quality is less than 70, so setting interFrameMaxError to 24');
+      }
+  
+  } else {
       console.log("Content Type is NOT MEGA GIF");
-    }
+  }
+  
   }
 
   /**
