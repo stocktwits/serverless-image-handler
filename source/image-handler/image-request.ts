@@ -107,12 +107,13 @@ export class ImageRequest {
           imageRequestInfo.edits[imageRequestInfo.outputFormat] = imageRequestInfo.edits[qualityKey];
           delete imageRequestInfo.edits[qualityKey];
         }
+      } 
       
     }
 
     if (imageRequestInfo.contentType === ContentTypes.GIF) {
       console.log("AddingMega .Outisde Gif");
-      console.log(JSON.stringify(imageRequestInfo.edits))
+      console.log(JSON.stringify(imageRequestInfo.edits));
       imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
     } else {
       console.log("Content Type is NOT MEGA GIF");
