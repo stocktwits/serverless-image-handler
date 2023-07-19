@@ -119,9 +119,12 @@ export class ImageRequest {
       if(gifQuality >= 70){
           imageRequestInfo.edits.gif.interFrameMaxError = 16;
           console.log('GIF quality is 70 or above, so setting interFrameMaxError to 16');
-      } else {
+      } else if(gifQuality >= 50 && gifQuality < 70) {
           imageRequestInfo.edits.gif.interFrameMaxError = 24;
-          console.log('GIF quality is less than 70, so setting interFrameMaxError to 24');
+          console.log('GIF quality is between 50 and 69, so setting interFrameMaxError to 24');
+      } else {
+          imageRequestInfo.edits.gif.interFrameMaxError = 32;
+          console.log('GIF quality is less than 50, so setting interFrameMaxError to 32');
       }
   
   } else {
