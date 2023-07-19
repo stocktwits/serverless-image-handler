@@ -107,19 +107,12 @@ export class ImageRequest {
           imageRequestInfo.edits[imageRequestInfo.outputFormat] = imageRequestInfo.edits[qualityKey];
           delete imageRequestInfo.edits[qualityKey];
         }
-
-        if (imageRequestInfo.contentType === ContentTypes.GIF) {
-          console.log("Adding .gif({ interFrameMaxError: 16 }) to edits");
-          imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
-        } else {
-          console.log("Content Type is NOT GIF");
-        }
-      } 
       
     }
 
     if (imageRequestInfo.contentType === ContentTypes.GIF) {
       console.log("AddingMega .Outisde Gif");
+      console.log(JSON.stringify(imageRequestInfo.edits))
       imageRequestInfo.edits.gif = { interFrameMaxError: 16 };
     } else {
       console.log("Content Type is NOT MEGA GIF");
