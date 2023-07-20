@@ -693,25 +693,13 @@ export class ImageRequest {
         imageRequestInfo.edits &&
         Object.keys(imageRequestInfo.edits).length > 0 && imageRequestInfo.edits.resize) {
           const metadata = await sharp(originalImage.originalImage).metadata();
-          let widthResized = false
-          let heightResized = false
           let resize = imageRequestInfo.edits.resize
               if(resize.width || resize.height){
                 if(this.shouldResize(resize.width, metadata.width)){
                   imageRequestInfo.edits.resize.width = metadata.width
-                  widthResized  = true
                 }
                 if(this.shouldResize(resize.height,metadata.height)){
                   imageRequestInfo.edits.resize.height = metadata.height
-                  heightResized = true
-                }
-                if(widthResized && heightResized){
-                    // bypass resizing only if Gif size is < 4MB
-                    // otherwise 413 is practically guaranteed when converting to base64
-                    // better to attempt to resize and check if it can still return a gif
-                    if(metadata.size < GIF_ALLOWED_RESIZE){
-                      delete imageRequestInfo.edits
-                    }
                 }
            } 
       }
