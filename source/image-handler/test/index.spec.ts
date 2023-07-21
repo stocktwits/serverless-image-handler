@@ -500,4 +500,23 @@ describe('handler', () => {
     // Cleanup the spying
     setupSpy.mockRestore();
   });
+  it('transform cloudflare URL', async () => {
+    let event = {
+      path: "/cdn-cgi/image/fit=crop,width=838,height=481,quality=70/production/original_530185319.gif",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/838x481/filters:quality(70)/production/original_530185319.gif"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
 });

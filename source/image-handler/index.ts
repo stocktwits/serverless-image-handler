@@ -148,14 +148,23 @@ function getResponseHeaders(isError: boolean = false, isAlb: boolean = false): H
  */
 function transformCdnUrls(url: string): string {
   // Regular expression to detect the second type of URL and capture the dynamic parts
-  const regex = /\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+/;
+  const oldCdnurls = /\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+/;
+  const cloudflareUrlformat = /\/cdn-cgi\/image\/fit=crop,width=(\d+),height=(\d+),quality=(\d+)\/(.*)/;
 
-  // Check if the URL matches the pattern
-  if (regex.test(url)) {
-   // Replace the matched part of the URL with an empty string, effectively removing it
-   return url.replace(regex, '');
+  // Check if the URL matches the existing pattern
+  if (oldCdnurls.test(url)) {
+      // Replace the matched part of the URL with an empty string, effectively removing it
+      return url.replace(oldCdnurls, '');
+  }
+  // If the existing pattern is not matched, check for the new pattern
+  else if (cloudflareUrlformat.test(url)) {
+      // Replace the matched part of the URL with the transformed string
+      return url.replace(cloudflareUrlformat, function(_, width, height, quality, remainder){
+          return `/fit-in/${width}x${height}/filters:quality(${quality})/${remainder}`;
+      });
   }
 
-  // If the URL does not match the pattern, return it unchanged
+  // If the URL does not match any pattern, return it unchanged
   return url;
 }
+
