@@ -148,7 +148,8 @@ function getResponseHeaders(isError: boolean = false, isAlb: boolean = false): H
  */
 function transformCdnUrls(url: string): string {
   const oldCdnurls = /\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+/;
-  const cloudflareUrlformat = /\/cdn-cgi\/image\/(?:fit=[^,]*,?)?(?:format\s*=\s*[^,]*,?)?(?:width\s*=\s*(\d+),?)?(?:height\s*=\s*(\d+),?)?(?:quality\s*=\s*(\d+),?)?(\/.*)/;
+  const cloudflareUrlformat = /\/cdn-cgi\/image\/([^/]*)\/(.*)/;
+  const paramFormat = /(fit|format|width|height|quality)=([^,]*)/g;
   // Check if the URL matches the existing pattern
   if (oldCdnurls.test(url)) {
       // Replace the matched part of the URL with an empty string, effectively removing it
@@ -157,15 +158,31 @@ function transformCdnUrls(url: string): string {
   // If the existing pattern is not matched, check for the new pattern
   else if (cloudflareUrlformat.test(url)) {
     let match = url.match(cloudflareUrlformat);
-    let width = match[1] || '0';
-    let height = match[2] || '0';
-    let quality = match[3] || '70';
-    let remainder = match[4] || '';
-
-    // Removes whitespace and any unwanted characters
-    remainder = remainder.replace(/\s+/g, '');
-
-    return `/fit-in/${width}x${height}/filters:quality(${quality})${remainder}`;
+    if (match) {
+      let paramsString = match[1];
+      let remainder = match[2];
+      
+      let width = '0';
+      let height = '0';
+      let quality = '70';
+      
+      let paramMatch;
+      while ((paramMatch = paramFormat.exec(paramsString)) !== null) {
+        switch (paramMatch[1]) {
+          case 'width':
+            width = paramMatch[2];
+            break;
+          case 'height':
+            height = paramMatch[2];
+            break;
+          case 'quality':
+            quality = paramMatch[2];
+            break;
+        }
+      }
+      
+      return `/fit-in/${width}x${height}/filters:quality(${quality})/${remainder}`;
+    }
   }
 
   // If the URL does not match any pattern, return it unchanged
