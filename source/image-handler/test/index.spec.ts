@@ -519,4 +519,99 @@ describe('handler', () => {
     // Cleanup the spying
     setupSpy.mockRestore();
   });
+  it('transform cloudflare URL with auto format and fit = cover', async () => {
+    let event = {
+      path: "/cdn-cgi/image/fit=cover,format = auto,width=838,height=481,quality=70/production/original_530185319.gif",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/838x481/filters:quality(70)/production/original_530185319.gif"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
+  it('transform cloudflare URL with height missing', async () => {
+    let event = {
+      path: "/cdn-cgi/image/fit=crop,width=838,quality=70/production/original_530185319.gif",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/838x0/filters:quality(70)/production/original_530185319.gif"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
+  it('transform cloudflare URL with width missing', async () => {
+    let event = {
+      path: "/cdn-cgi/image/fit=crop,height=838,quality=70/production/original_530185319.gif",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/0x838/filters:quality(70)/production/original_530185319.gif"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
+  it('transform cloudflare URL with external  url ', async () => {
+    let event = {
+      path: "/cdn-cgi/image/fit=cover,format=auto,width=838,height=481,quality=70/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/838x481/filters:quality(70)/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg" 
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
+  it('transform cloudflare URL with missing quality  url ', async () => {
+    let event = {
+      path: "/cdn-cgi/image/fit=cover,width=838,height=481/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/838x481/filters:quality(70)/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg" 
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
 });
