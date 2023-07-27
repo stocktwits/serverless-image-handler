@@ -578,7 +578,7 @@ describe('handler', () => {
   });
   it('transform cloudflare URL with external  url ', async () => {
     let event = {
-      path: "/cdn-cgi/image/fit=cover,format=auto,width=838,height=481,quality=70/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg",
+      path: "/cdn-cgi/image/format=auto,fit=cover,quality=75,width=70/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg",
     };
 
     
@@ -589,7 +589,7 @@ describe('handler', () => {
     // check that setup has been called with the correctly transformed URL
     expect(setupSpy).toHaveBeenCalledWith({
       ...event,
-      path: "/fit-in/838x481/filters:quality(70)/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg" 
+      path: "/fit-in/70x0/filters:quality(75)/https://mma.prnewswire.com/media/1333368/InvestorsObserver_Logo.jpg" 
     });
 
     // Cleanup the spying
