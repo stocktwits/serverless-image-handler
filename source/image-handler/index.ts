@@ -147,10 +147,8 @@ function getResponseHeaders(isError: boolean = false, isAlb: boolean = false): H
  * @returns Transformed URL.
  */
 function transformCdnUrls(url: string): string {
-  // Regular expression to detect the second type of URL and capture the dynamic parts
   const oldCdnurls = /\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+/;
-  const cloudflareUrlformat = /\/cdn-cgi\/image\/fit=crop,width=(\d+),height=(\d+),quality=(\d+)\/(.*)/;
-
+  const cloudflareUrlformat = /\/cdn-cgi\/image\/(?:fit=[^,]*,?)?(?:format\s*=\s*[^,]*,?)?(?:width\s*=\s*(\d+),?)?(?:height\s*=\s*(\d+),?)?(?:quality\s*=\s*(\d+),?)?(\/.*)/;
   // Check if the URL matches the existing pattern
   if (oldCdnurls.test(url)) {
       // Replace the matched part of the URL with an empty string, effectively removing it
@@ -158,13 +156,18 @@ function transformCdnUrls(url: string): string {
   }
   // If the existing pattern is not matched, check for the new pattern
   else if (cloudflareUrlformat.test(url)) {
-      // Replace the matched part of the URL with the transformed string
-      return url.replace(cloudflareUrlformat, function(_, width, height, quality, remainder){
-          return `/fit-in/${width}x${height}/filters:quality(${quality})/${remainder}`;
-      });
+    let match = url.match(cloudflareUrlformat);
+    let width = match[1] || '0';
+    let height = match[2] || '0';
+    let quality = match[3] || '70';
+    let remainder = match[4] || '';
+
+    // Removes whitespace and any unwanted characters
+    remainder = remainder.replace(/\s+/g, '');
+
+    return `/fit-in/${width}x${height}/filters:quality(${quality})${remainder}`;
   }
 
   // If the URL does not match any pattern, return it unchanged
   return url;
 }
-
