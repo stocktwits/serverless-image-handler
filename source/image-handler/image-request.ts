@@ -83,10 +83,6 @@ export class ImageRequest {
    * @param imageRequestInfo Initialized image request information
    */
   private fixQuality(imageRequestInfo: ImageRequestInfo): void {
-    let imageRequestInfoCopy = { ...imageRequestInfo };
-    delete imageRequestInfoCopy.originalImage;
-    console.log("fix Quality Image Infor"+ JSON.stringify(imageRequestInfoCopy));
-
     if (imageRequestInfo.outputFormat) {
       const requestType = [RequestTypes.CUSTOM, RequestTypes.THUMBOR];
       const acceptedValues = [

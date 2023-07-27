@@ -124,7 +124,6 @@ export class ImageHandler {
    */
   public async applyEdits(originalImage: sharp.Sharp, edits: ImageEdits, isAnimation: boolean): Promise<sharp.Sharp> {
     await this.applyResize(originalImage, edits);
-    console.info("Received event:", JSON.stringify(edits));
 
     // Apply the image edits
     for (const edit in edits) {
