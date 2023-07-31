@@ -147,13 +147,17 @@ function getResponseHeaders(isError: boolean = false, isAlb: boolean = false): H
  * @returns Transformed URL.
  */
 function transformCdnUrls(url: string): string {
-  const oldCdnurls = /\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+/;
+  const oldCdnurls = /((?:\/[^/]+)*\/filters:[^/]*)\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+(\/.*)/;
   const cloudflareUrlformat = /\/cdn-cgi\/image\/([^/]*)\/(.*)/;
   const paramFormat = /(fit|format|width|height|quality)=([^,]*)/g;
   // Check if the URL matches the existing pattern
   if (oldCdnurls.test(url)) {
-      // Replace the matched part of the URL with an empty string, effectively removing it
-      return url.replace(oldCdnurls, '');
+    //Oldurl is interfering with new pattern so needed to make changes
+    //all test cases are passing 
+    let match = url.match(oldCdnurls);
+    if (match) {
+    return match[1] + match[2];
+    }
   }
   // If the existing pattern is not matched, check for the new pattern
   else if (cloudflareUrlformat.test(url)) {
