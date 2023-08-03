@@ -108,12 +108,21 @@ export class ImageHandler {
       throw new ImageHandlerError(
         StatusCodes.REQUEST_TOO_LONG,
         "TooLargeImageException",
-        "The converted image is too large to return."
+        "The converted image is too large to return. " + this.logImageRequestInfo(imageRequestInfo)
       );
     }
 
     return base64EncodedImage;
   }
+
+  private logImageRequestInfo(imageRequestInfo: ImageRequestInfo) {
+    const { key, contentType, edits } = imageRequestInfo;
+    const editsString = JSON.stringify(edits, null, 2); // Formats the edits object with 2-space indentation
+  
+    const logMessage = `Key: ${key}\nContent Type: ${contentType}\nEdits: ${editsString}`;
+    return  logMessage
+  }
+  
 
   /**
    * Applies image modifications to the original image based on edits.
