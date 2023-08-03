@@ -1,17 +1,8 @@
 {
   "name": "source",
   "version": "6.1.1",
-  "st-version": "1.0.0",
   "private": true,
-<<<<<<< HEAD
-<<<<<<< HEAD
   "st-version": "1.2.0",
-=======
-  "st-version": "1.1.0",
->>>>>>> 0a1042c ([GROWTH-1032] add st version)
-=======
-  "st-version": "1.2.0",
->>>>>>> a0ccb1b ([BG][Growth 1027]: reduce url errors (#14))
   "description": "ESLint and prettier dependencies to be used within the solution",
   "license": "Apache-2.0",
   "author": "AWS Solutions",
