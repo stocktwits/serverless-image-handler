@@ -614,4 +614,61 @@ describe('handler', () => {
     // Cleanup the spying
     setupSpy.mockRestore();
   });
+  it('oldCdnUrls with any fit type and only width ', async () => {
+    let event = {
+      path: "/fit-in/500x0/filters:quality(75)/cdn-cgi/image/fit=random-text,width=575/production/original_225556148.png",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/500x0/filters:quality(75)/production/original_225556148.png"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
+  it('oldCdnUrls with any fit type and only height ', async () => {
+    let event = {
+      path: "/fit-in/500x0/filters:quality(75)/cdn-cgi/image/fit=random-text,height=575/production/original_225556148.png",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/500x0/filters:quality(75)/production/original_225556148.png"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
+  it('oldCdnUrls with any fit-type only  ', async () => {
+    let event = {
+      path: "/fit-in/500x0/filters:quality(75)/cdn-cgi/image/fit=random-text/production/original_225556148.png",
+    };
+
+    
+    const setupSpy = jest.spyOn(ImageRequest.prototype, 'setup');
+
+    await handler(event);
+
+    // check that setup has been called with the correctly transformed URL
+    expect(setupSpy).toHaveBeenCalledWith({
+      ...event,
+      path: "/fit-in/500x0/filters:quality(75)/production/original_225556148.png"
+    });
+
+    // Cleanup the spying
+    setupSpy.mockRestore();
+  });
 });
