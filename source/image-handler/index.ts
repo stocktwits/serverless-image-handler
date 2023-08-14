@@ -147,15 +147,48 @@ function getResponseHeaders(isError: boolean = false, isAlb: boolean = false): H
  * @returns Transformed URL.
  */
 function transformCdnUrls(url: string): string {
-  // Regular expression to detect the second type of URL and capture the dynamic parts
-  const regex = /\/cdn-cgi\/image\/fit=contain,width=\d+,height=\d+/;
-
-  // Check if the URL matches the pattern
-  if (regex.test(url)) {
-   // Replace the matched part of the URL with an empty string, effectively removing it
-   return url.replace(regex, '');
+  const oldCdnurls = /((?:\/[^/]+)*\/filters:[^/]*)\/cdn-cgi\/image\/fit=[^,]*((,width=\d+)?(,height=\d+)?)(\/[^/]*)(\/.*)/;
+  const cloudflareUrlformat = /\/cdn-cgi\/image\/([^/]*)\/(.*)/;
+  const paramFormat = /(fit|format|width|height|quality)=([^,]*)/g;
+  // Check if the URL matches the existing pattern
+  if (oldCdnurls.test(url)) {
+    //Oldurl is interfering with new pattern so needed to make changes
+    //all test cases are passing 
+    let match = url.match(oldCdnurls);
+    if (match) {
+    return match[1] + match[5] + match[6];
+    }
+  }
+  // If the existing pattern is not matched, check for the new pattern
+  else if (cloudflareUrlformat.test(url)) {
+    let match = url.match(cloudflareUrlformat);
+    if (match) {
+      let paramsString = match[1];
+      let remainder = match[2];
+      
+      let width = '0';
+      let height = '0';
+      let quality = '70';
+      
+      let paramMatch;
+      while ((paramMatch = paramFormat.exec(paramsString)) !== null) {
+        switch (paramMatch[1]) {
+          case 'width':
+            width = paramMatch[2];
+            break;
+          case 'height':
+            height = paramMatch[2];
+            break;
+          case 'quality':
+            quality = paramMatch[2];
+            break;
+        }
+      }
+      
+      return `/fit-in/${width}x${height}/filters:quality(${quality})/${remainder}`;
+    }
   }
 
-  // If the URL does not match the pattern, return it unchanged
+  // If the URL does not match any pattern, return it unchanged
   return url;
 }
