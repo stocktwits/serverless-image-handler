@@ -51,5 +51,8 @@ jobs:
           role-to-assume: arn:aws:iam::146390941810:role/StocktwitsServerlessImageHandlerGithub
           role-session-name: GithubActions
 
+      - name: Deploy function code for st-avatars bucket
+        run: aws lambda update-function-code --function-name sih-st-avatars-staging-BackEndImageHandlerLambdaFu-ERZDOed59DuA --zip-file fileb://`pwd`/image-handler.zip --publish
+
       - name: Deploy function code for st-charts bucket
         run: aws lambda update-function-code --function-name sih-st-charts-staging-BackEndImageHandlerLambdaFun-kyYjf3x2xFUo --zip-file fileb://`pwd`/image-handler.zip --publish
