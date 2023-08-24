@@ -24,10 +24,10 @@ import { ThumborMapper } from "./thumbor-mapper";
 import https from 'https';
 import http from 'http';
 import { URL } from "url";
-
+//This will be true unless source bucket is ST-avatars or if SOURCE_BUCKETS is not set
+const COMPRESS_GIF = process.env.SOURCE_BUCKETS !== 'st-avatars' || process.env.SOURCE_BUCKETS === undefined;
 const MAX_PERCENTAGE = parseInt(process.env.MAX_PERCENTAGE, 10) || 75
 const MIN_PERCENTAGE = parseInt(process.env.MIN_PERCENTAGE, 10) || 25
-const GIF_ALLOWED_RESIZE = parseInt(process.env.GIF_ALLOWED_RESIZE, 10) || 4 * 1024 * 1024 
 const MAX_IMAGE_SIZE = 6 * 1024 * 1024; //6 MB
 const ALLOWED_CONTENT_TYPES = [
   'image/jpeg',
@@ -111,7 +111,7 @@ export class ImageRequest {
       
     }
 
-    /*if (imageRequestInfo.contentType === ContentTypes.GIF) {  
+    if (imageRequestInfo.contentType === ContentTypes.GIF  && COMPRESS_GIF === true) {
       //Gif quality as per sharp doc can be controlled by adding interframe error 
       //between 0 to 32 .After doing a bit of experimentation adding the below compression
       //reduces the chance for 413 excpeption by a good margin and looks almost the same
@@ -123,7 +123,7 @@ export class ImageRequest {
       } else {
           imageRequestInfo.edits.gif.interFrameMaxError = 32;
       }
-  }*/
+  }
 
 }
 
