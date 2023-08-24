@@ -111,7 +111,7 @@ export class ImageRequest {
       
     }
 
-    if (imageRequestInfo.contentType === ContentTypes.GIF) {  
+    /*if (imageRequestInfo.contentType === ContentTypes.GIF) {  
       //Gif quality as per sharp doc can be controlled by adding interframe error 
       //between 0 to 32 .After doing a bit of experimentation adding the below compression
       //reduces the chance for 413 excpeption by a good margin and looks almost the same
@@ -123,7 +123,7 @@ export class ImageRequest {
       } else {
           imageRequestInfo.edits.gif.interFrameMaxError = 32;
       }
-  }
+  }*/
 
 }
 
