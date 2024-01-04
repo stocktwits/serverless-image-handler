@@ -79,7 +79,7 @@ export class ImageHandler {
     let base64EncodedImage = "";
 
     // Apply edits if specified
-    if (edits && Object.keys(edits).length) {
+    if (edits && Object.keys(edits).length && imageRequestInfo.contentType !== ContentTypes.GIF) {
       // convert image to Sharp object
       const image = await this.instantiateSharpImage(originalImage, edits, options);
       // apply image edits
@@ -90,7 +90,7 @@ export class ImageHandler {
       const imageBuffer = await modifiedImage.toBuffer();
       base64EncodedImage = imageBuffer.toString("base64");
     } else {
-      if (imageRequestInfo.outputFormat !== undefined) {
+      if (imageRequestInfo.outputFormat !== undefined && imageRequestInfo.contentType !== ContentTypes.GIF) {
         // convert image to Sharp and change output format if specified
         const modifiedImage = this.modifyImageOutput(sharp(originalImage, options), imageRequestInfo);
         // convert to base64 encoded string
@@ -98,6 +98,7 @@ export class ImageHandler {
         base64EncodedImage = imageBuffer.toString("base64");
       } else {
         // no edits or output format changes, convert to base64 encoded image
+        console.log("No edits or output format changes, convert to base64 encoded image , could be GIF");
         base64EncodedImage = originalImage.toString("base64");
       }
     }
