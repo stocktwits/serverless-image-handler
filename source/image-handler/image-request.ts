@@ -288,14 +288,7 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
    * @returns The original image or an error.
    */
   public async getOriginalImage(bucket: string, key: string): Promise<OriginalImageInfo> {
-    let decodedURL; // decoding causes issues with some url types let pupeeteer handle it for http urls
-    if (key.includes('http')) {
-      decodedURL = decodeURIComponent(key);
-    } else {
-      decodedURL = decodeURIComponent(key);
-    }
-    console.info("url is " + decodedURL);
-
+    let decodedURL = decodeURIComponent(key);
     try {
       const result: OriginalImageInfo = {};
 
