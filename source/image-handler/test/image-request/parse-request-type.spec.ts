@@ -40,7 +40,22 @@ describe("parseRequestType", () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it("Should pass if the method detects a thumbor request", () => {
+  it("Should detetct external if path contains http", () => {
+    // Arrange
+    const event = {
+      path: "/unsafe/filters:brightness(10):contrast(30)/http://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Coffee_berries_1.jpg/1200px-Coffee_berries_1.jpg",
+    };
+    process.env = {};
+
+    // Act
+    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const result = imageRequest.parseRequestType(event);
+
+    // Assert
+    expect(result).toEqual(RequestTypes.EXTERNAL);
+  });
+
+  it("Should detetct external if path contains https", () => {
     // Arrange
     const event = {
       path: "/unsafe/filters:brightness(10):contrast(30)/https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Coffee_berries_1.jpg/1200px-Coffee_berries_1.jpg",
@@ -52,8 +67,7 @@ describe("parseRequestType", () => {
     const result = imageRequest.parseRequestType(event);
 
     // Assert
-    expect(consoleInfoSpy).toHaveBeenCalledWith("Path is not base64 encoded.");
-    expect(result).toEqual(RequestTypes.THUMBOR);
+    expect(result).toEqual(RequestTypes.EXTERNAL);
   });
 
   it("Should pass if get a request with supported image extension", () => {
