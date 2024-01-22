@@ -149,8 +149,6 @@ export class ImageRequest {
       imageRequestInfo.key = this.parseImageKey(event, imageRequestInfo.requestType);
       imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
 
-      console.info("imageRequestInfo.key " + JSON.stringify(imageRequestInfo.key));
-
       const originalImage = await this.getOriginalImage(imageRequestInfo.bucket, imageRequestInfo.key);
       imageRequestInfo = { ...imageRequestInfo, ...originalImage };
 
@@ -257,8 +255,6 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
           defaultViewport: chromium.defaultViewport,
       });
 
-      console.log(`Browser launched with version: ${await browser.version()}`);
-
       const page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
       await page.setExtraHTTPHeaders({
@@ -294,7 +290,7 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
   public async getOriginalImage(bucket: string, key: string): Promise<OriginalImageInfo> {
     let decodedURL; // decoding causes issues with some url types let pupeeteer handle it for http urls
     if (key.includes('http')) {
-      decodedURL = key;
+      decodedURL = decodeURIComponent(key);
     } else {
       decodedURL = decodeURIComponent(key);
     }
@@ -434,7 +430,6 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
    * @returns The name of the appropriate Amazon S3 key.
    */
   public parseImageKey(event: ImageHandlerEvent, requestType: RequestTypes): string {
-    console.info("requestType " + requestType);
     if (requestType === RequestTypes.DEFAULT || requestType === RequestTypes.EXTERNAL) {
       // Decode the image request and return the image key
       const { key } = this.decodeRequest(event);
