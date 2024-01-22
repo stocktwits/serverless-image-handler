@@ -15,6 +15,7 @@ export enum RequestTypes {
   DEFAULT = "Default",
   CUSTOM = "Custom",
   THUMBOR = "Thumbor",
+  EXTERNAL = "External",
 }
 
 export enum ImageFormatTypes {
