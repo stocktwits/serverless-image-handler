@@ -4,7 +4,7 @@
 import S3 from "aws-sdk/clients/s3";
 import { createHmac } from "crypto";
 import sharp, { Metadata } from "sharp";
-
+import axios from 'axios';
 
 import {
   ContentTypes,
@@ -201,8 +201,24 @@ export class ImageRequest {
 
   public async getImageBytes(url: string, depth: number) {
     return new Promise((resolve, reject) => {
+      const preset_headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"macOS"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'referrer': 'www.google.com',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'Host': new URL(url).hostname,
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
+      }; 
       const protocol = url.startsWith('https') ? https : http;
-      protocol.get(url, {headers: {'User-Agent': 'Mozilla/5.0'}}, response => {
+      protocol.get(url, {headers: preset_headers}, response => {
         if (depth > MAX_REDIRECTS) {
           reject(new Error(`Failed to get the image: too many redirects`));
           return;
@@ -241,6 +257,87 @@ export class ImageRequest {
     });
   }
 
+  /**
+   * This function is used to get the image bytes from the url using the axios library.
+   * @param url 
+   * @param depth 
+   * @returns buffer
+   */
+  public async getImageBytesUsingAxios(url: string, depth: number = 0): Promise<Buffer> {
+    const headers = {
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept-Language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"macOS"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'referrer': 'www.google.com',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
+      'Host': new URL(url).hostname,
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
+    }; 
+
+    try {
+        const response = await axios.get(url, {
+            headers: headers,
+            timeout: TIMEOUT,
+            maxRedirects: MAX_REDIRECTS,
+            responseType: 'arraybuffer'
+        });
+
+        const contentType = response.headers['content-type']?.split(';')[0];
+        if (!contentType || !ALLOWED_CONTENT_TYPES.includes(contentType)) {
+            throw new Error(`Invalid content type, only the following content types are allowed: ${ALLOWED_CONTENT_TYPES.join(', ')}`);
+        }
+
+        if (response.data.byteLength > MAX_IMAGE_SIZE) {
+            throw new Error(`The image is too large, the maximum allowed size is ${MAX_IMAGE_SIZE} bytes`);
+        }
+
+        return Buffer.from(response.data);
+
+    } catch (error) {
+        if (error.response) {
+            // Request made and server responded
+            throw new Error(`Failed to get the image at ${url}. Status code: ${error.response.status}`);
+        } else if (error.request) {
+            // The request was made but no response was received
+            throw new Error(`No response received for ${url}.`);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            throw error;
+        }
+    }
+}
+
+    
+public async fetchImage(url: string) {
+  const depth = 0; // Assuming depth is used for internal logic
+  try {
+      // Try fetching with the first method
+      return await this.getImageBytes(url, depth);
+  } catch (error) {
+      console.error('Error in getImageBytes:', error.message);
+      // The first method failed, try the second method
+      try {
+          return await this.getImageBytesUsingAxios(url, depth);
+      } catch (error) {
+          console.error('Error in getImageBytesUsingAxios:', error.message);
+          // The second method also failed, try the third method
+          try {
+              return await this.getImageBytesUsingPuppeteer(url);
+          } catch (error) {
+              console.error('Error in getImageBytesUsingPuppeteer:', error.message);
+              // All methods failed, throw an error
+              throw new Error('All methods failed to fetch the image');
+          }
+      }
+  }
+}
 
 public async getImageBytesUsingPuppeteer(imageUrl) {
   let browser = null;
@@ -310,7 +407,7 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
       const imageLocation = { Bucket: bucket, Key: key };
       let imageBuffer: Buffer;
       if (this.isValidURL(decodedURL)) {
-        let imgBytes = await this.getImageBytesUsingPuppeteer(decodedURL);
+        let imgBytes = await this.fetchImage(decodedURL);
         imageBuffer = Buffer.from(imgBytes as Uint8Array);
 
         result.contentType = this.inferImageType(imageBuffer);
