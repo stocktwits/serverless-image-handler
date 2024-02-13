@@ -24,6 +24,12 @@ import { ThumborMapper } from "./thumbor-mapper";
 import https from 'https';
 import http from 'http';
 import { URL } from "url";
+
+const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
+
 //This will be true unless source bucket is ST-avatars or if SOURCE_BUCKETS is not set
 const COMPRESS_GIF = process.env.SOURCE_BUCKETS !== 'st-avatars' || process.env.SOURCE_BUCKETS === undefined;
 const MAX_PERCENTAGE = parseInt(process.env.MAX_PERCENTAGE, 10) || 75
@@ -195,8 +201,24 @@ export class ImageRequest {
 
   public async getImageBytes(url: string, depth: number) {
     return new Promise((resolve, reject) => {
+      const preset_headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"macOS"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'referrer': 'www.google.com',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'Host': new URL(url).hostname,
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
+      }; 
       const protocol = url.startsWith('https') ? https : http;
-      protocol.get(url, {headers: {'User-Agent': 'Mozilla/5.0'}}, response => {
+      protocol.get(url, {headers: preset_headers}, response => {
         if (depth > MAX_REDIRECTS) {
           reject(new Error(`Failed to get the image: too many redirects`));
           return;
@@ -243,10 +265,21 @@ export class ImageRequest {
    */
   public async getImageBytesUsingAxios(url: string, depth: number = 0): Promise<Buffer> {
     const headers = {
-        'Host': new URL(url).hostname,
-        'Accept': '*/*',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
-    };
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept-Language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"macOS"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'referrer': 'www.google.com',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
+      'Host': new URL(url).hostname,
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15'
+    }; 
 
     try {
         const response = await axios.get(url, {
@@ -281,6 +314,85 @@ export class ImageRequest {
     }
 }
 
+    
+public async fetchImage(url: string) {
+  const depth = 0; // Assuming depth is used for internal logic
+  try {
+      // Try fetching with the first method
+      return await this.getImageBytes(url, depth);
+  } catch (error) {
+      console.error('Error in getImageBytes:', error.message);
+      // The first method failed, try the second method
+      try {
+          return await this.getImageBytesUsingAxios(url, depth);
+      } catch (error) {
+          console.error('Error in getImageBytesUsingAxios:', error.message);
+          // The second method also failed, try the third method
+          try {
+              return await this.getImageBytesUsingPuppeteer(url);
+          } catch (error) {
+              console.error('Error in getImageBytesUsingPuppeteer:', error.message);
+              // All methods failed, throw an error
+              throw new Error('All methods failed to fetch the image');
+          }
+      }
+  }
+}
+
+public async getImageBytesUsingPuppeteer(imageUrl) {
+  let browser = null;
+  console.log(`Trying to launch browser with: ${JSON.stringify(chromium.args)}`);
+
+  try {
+      // Launching the browser with chrome-aws-lambda
+      browser = await puppeteer.launch({
+          args: ['--no-sandbox', '--disable-setuid-sandbox', ...chromium.args],
+          executablePath: await chromium.executablePath(),
+          headless: true,
+          defaultViewport: chromium.defaultViewport,
+      });
+
+      const page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
+      const headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"macOS"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
+      };
+
+     await page.setExtraHTTPHeaders(headers);
+      
+      // Navigate directly to the image URL
+      const response = await page.goto(imageUrl, { waitUntil: 'networkidle2' });
+      
+      if(response.status() !== 200) {
+        await browser.close();
+        throw new Error(`Failed to get the image at ${imageUrl}. Status code: ${response.status()}` );
+      }
+
+      const buffer = await response.buffer();
+
+      await browser.close();
+      return buffer;
+  } catch (error) {
+      if (browser !== null) {
+          await browser.close();
+      }
+      throw error;
+  }
+}
+
+
+
+
   /**
    * Gets the original image from an Amazon S3 bucket.
    * @param bucket The name of the bucket containing the image.
@@ -295,7 +407,7 @@ export class ImageRequest {
       const imageLocation = { Bucket: bucket, Key: key };
       let imageBuffer: Buffer;
       if (this.isValidURL(decodedURL)) {
-        let imgBytes = await this.getImageBytesUsingAxios(decodedURL, 0);
+        let imgBytes = await this.fetchImage(decodedURL);
         imageBuffer = Buffer.from(imgBytes as Uint8Array);
 
         result.contentType = this.inferImageType(imageBuffer);
@@ -377,7 +489,7 @@ export class ImageRequest {
         const sourceBuckets = this.getAllowedSourceBuckets();
         return sourceBuckets[0];
       }
-    } else if (requestType === RequestTypes.THUMBOR || requestType === RequestTypes.CUSTOM) {
+    } else if (requestType === RequestTypes.THUMBOR || requestType === RequestTypes.CUSTOM || requestType === RequestTypes.EXTERNAL) {
       // Use the default image source bucket env var
       const sourceBuckets = this.getAllowedSourceBuckets();
       return sourceBuckets[0];
@@ -400,7 +512,7 @@ export class ImageRequest {
     if (requestType === RequestTypes.DEFAULT) {
       const decoded = this.decodeRequest(event);
       return decoded.edits;
-    } else if (requestType === RequestTypes.THUMBOR) {
+    } else if (requestType === RequestTypes.THUMBOR || requestType == RequestTypes.EXTERNAL) {
       const thumborMapping = new ThumborMapper();
       return thumborMapping.mapPathToEdits(event.path);
     } else if (requestType === RequestTypes.CUSTOM) {
@@ -423,9 +535,10 @@ export class ImageRequest {
    * @returns The name of the appropriate Amazon S3 key.
    */
   public parseImageKey(event: ImageHandlerEvent, requestType: RequestTypes): string {
-    if (requestType === RequestTypes.DEFAULT) {
+    if (requestType === RequestTypes.DEFAULT || requestType === RequestTypes.EXTERNAL) {
       // Decode the image request and return the image key
       const { key } = this.decodeRequest(event);
+     
       return key;
     }
 
@@ -488,7 +601,11 @@ export class ImageRequest {
       isBase64Encoded = false;
     }
 
-    if (matchDefault.test(path) && isBase64Encoded) {
+
+    if(path.toLowerCase().includes("http")){
+      return RequestTypes.EXTERNAL;
+    }
+    else if (matchDefault.test(path) && isBase64Encoded) {
       // use sharp
       return RequestTypes.DEFAULT;
     } else if (definedEnvironmentVariables) {
@@ -529,7 +646,7 @@ export class ImageRequest {
    * Provides error handling for invalid or undefined path values.
    * @param event Lambda request body.
    * @returns The decoded from base-64 image request.
-   */
+   *
   public decodeRequest(event: ImageHandlerEvent): DefaultImageRequest {
     const { path } = event;
 
@@ -553,7 +670,47 @@ export class ImageRequest {
         "The URL path you provided could not be read. Please ensure that it is properly formed according to the solution documentation."
       );
     }
-  }
+  }*/
+  public decodeRequest(event: ImageHandlerEvent): DefaultImageRequest {
+    const { path } = event;
+    console.log("path is " + path);
+
+    if (path) {
+      // Find the index where 'http' starts
+      const httpIndex = path.indexOf('http');
+      console.log("httpIndex " + httpIndex);
+      
+      if (httpIndex !== -1) {
+        // Extract URL from the point where 'http' is found
+        const key = path.substring(httpIndex);
+        console.log("key " + key);
+        // Return an object of type DefaultImageRequest with the URL as the key
+        return { key: key }; // 'key' is the required property of DefaultImageRequest
+      } else {
+        // Handle paths without 'http' (non-URL paths)
+        const encoded = path.charAt(0) === "/" ? path.slice(1) : path;
+        const toBuffer = Buffer.from(encoded, "base64");
+        try {
+          return JSON.parse(toBuffer.toString());
+        } catch (error) {
+          throw new ImageHandlerError(
+            StatusCodes.BAD_REQUEST,
+            "DecodeRequest::CannotDecodeRequest",
+            "The image request you provided could not be decoded. Please check that your request is base64 encoded properly and refer to the documentation for additional guidance."
+          );
+        }
+      }
+    } else {
+      throw new ImageHandlerError(
+        StatusCodes.BAD_REQUEST,
+        "DecodeRequest::CannotReadPath",
+        "The URL path you provided could not be read. Please ensure that it is properly formed according to the solution documentation."
+      );
+    }
+}
+
+
+
 
   /**
    * Returns a formatted image source bucket allowed list as specified in the SOURCE_BUCKETS environment variable of the image handler Lambda function.
