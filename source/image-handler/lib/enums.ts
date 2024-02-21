@@ -28,6 +28,7 @@ export enum ImageFormatTypes {
   HEIC = "heic",
   RAW = "raw",
   GIF = "gif",
+  AVIF = "avif",  
 }
 
 export enum ImageFitTypes {
@@ -45,4 +46,5 @@ export enum ContentTypes {
   TIFF = "image/tiff",
   GIF = "image/gif",
   SVG = "image/svg+xml",
+  AVIF = "image/avif"
 }

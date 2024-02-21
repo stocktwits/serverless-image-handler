@@ -98,6 +98,7 @@ export class ImageRequest {
         ImageFormatTypes.TIFF,
         ImageFormatTypes.HEIF,
         ImageFormatTypes.GIF,
+        ImageFormatTypes.AVIF
       ];
 
       imageRequestInfo.contentType = `image/${imageRequestInfo.outputFormat}`;
@@ -756,6 +757,10 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
    * @returns The output format.
    */
   public inferImageType(imageBuffer: Buffer): string {
+     // First, check if the image is AVIF
+     if (this.isAVIF(imageBuffer)) {
+      return ContentTypes.AVIF;
+    }
     const imageSignature = imageBuffer.slice(0, 4).toString("hex").toUpperCase();
     switch (imageSignature) {
       case "89504E47":
@@ -781,6 +786,46 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
         );
     }
   }
+
+  private  isAVIF(imageBuffer: Buffer): boolean {
+    // Quick check for "ftypavif" in the beginning of the buffer
+    const extendedSignature = imageBuffer.subarray(0, 12).toString("hex").toUpperCase();
+    if (extendedSignature.includes("6674797061766966")) { // "ftypavif" in hexadecimal
+        return true; // Quick detection of AVIF
+    }
+
+    // Detailed parsing to find the 'ftyp' box and check for 'avif' major brand
+    let offset = 0; // Start at the beginning of the buffer
+
+    while (offset < imageBuffer.length) {
+        // Ensure there's enough buffer left to read the size and type
+        if (offset + 8 > imageBuffer.length) break;
+
+        // Read the box size and type
+        const size = imageBuffer.readUInt32BE(offset); // Box size
+        if(size < 8) { // Ensure that size is realistic to prevent infinite loops
+            break;
+        }
+        const type = imageBuffer.toString('ascii', offset + 4, offset + 8); // Box type
+
+        if (type === 'ftyp') {
+            // Ensure there's enough buffer to read the major brand
+            if (offset + 12 > imageBuffer.length) break;
+
+            const majorBrand = imageBuffer.toString('ascii', offset + 8, offset + 12);
+            if (majorBrand === 'avif') {
+                return true; // Found 'ftyp' box with 'avif' major brand
+            }
+            break; // Found 'ftyp' but not 'avif', no need to continue
+        }
+
+        // Move to the next box
+        offset += size;
+    }
+
+    return false; // 'ftyp' box with 'avif' major brand not found
+}
+
 
   /**
    * Validates the request's signature.
