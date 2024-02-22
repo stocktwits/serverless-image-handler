@@ -98,6 +98,7 @@ export class ImageRequest {
         ImageFormatTypes.TIFF,
         ImageFormatTypes.HEIF,
         ImageFormatTypes.GIF,
+        ImageFormatTypes.AVIF
       ];
 
       imageRequestInfo.contentType = `image/${imageRequestInfo.outputFormat}`;
@@ -758,29 +759,76 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
   public inferImageType(imageBuffer: Buffer): string {
     const imageSignature = imageBuffer.slice(0, 4).toString("hex").toUpperCase();
     switch (imageSignature) {
-      case "89504E47":
-        return ContentTypes.PNG;
-      case "FFD8FFDB":
-      case "FFD8FFE0":
-      case "FFD8FFED":
-      case "FFD8FFEE":
-      case "FFD8FFE1":
-        return ContentTypes.JPEG;
-      case "52494646":
-        return ContentTypes.WEBP;
-      case "49492A00":
-      case "4D4D002A":
-        return ContentTypes.TIFF;
-      case "47494638":
-        return ContentTypes.GIF;
-      default:
-        throw new ImageHandlerError(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "RequestTypeError",
-          "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg). Refer to the documentation for additional guidance on forming image requests."
-        );
+        case "89504E47":
+            return ContentTypes.PNG;
+        case "FFD8FFDB":
+        case "FFD8FFE0":
+        case "FFD8FFED":
+        case "FFD8FFEE":
+        case "FFD8FFE1":
+            return ContentTypes.JPEG;
+        case "52494646":
+            return ContentTypes.WEBP;
+        case "49492A00":
+        case "4D4D002A":
+            return ContentTypes.TIFF;
+        case "47494638":
+            return ContentTypes.GIF;
+        // No default case here to allow further checks after the switch
     }
-  }
+
+    // Now, check for AVIF after the switch and before throwing an error
+    if (this.isAVIF(imageBuffer)) {
+        return ContentTypes.AVIF;
+    }
+
+    // If no known signature or AVIF is detected, throw an error
+    throw new ImageHandlerError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        "RequestTypeError",
+        "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg, avif). Refer to the documentation for additional guidance on forming image requests."
+    );
+}
+
+  private  isAVIF(imageBuffer: Buffer): boolean {
+    // Quick check for "ftypavif" in the beginning of the buffer
+    const extendedSignature = imageBuffer.subarray(0, 12).toString("hex").toUpperCase();
+    if (extendedSignature.includes("6674797061766966")) { // "ftypavif" in hexadecimal
+        return true; // Quick detection of AVIF
+    }
+
+    // Detailed parsing to find the 'ftyp' box and check for 'avif' major brand
+    let offset = 0; // Start at the beginning of the buffer
+
+    while (offset < imageBuffer.length) {
+        // Ensure there's enough buffer left to read the size and type
+        if (offset + 8 > imageBuffer.length) break;
+
+        // Read the box size and type
+        const size = imageBuffer.readUInt32BE(offset); // Box size
+        if(size < 8) { // Ensure that size is realistic to prevent infinite loops
+            break;
+        }
+        const type = imageBuffer.toString('ascii', offset + 4, offset + 8); // Box type
+
+        if (type === 'ftyp') {
+            // Ensure there's enough buffer to read the major brand
+            if (offset + 12 > imageBuffer.length) break;
+
+            const majorBrand = imageBuffer.toString('ascii', offset + 8, offset + 12);
+            if (majorBrand === 'avif') {
+                return true; // Found 'ftyp' box with 'avif' major brand
+            }
+            break; // Found 'ftyp' but not 'avif', no need to continue
+        }
+
+        // Move to the next box
+        offset += size;
+    }
+
+    return false; // 'ftyp' box with 'avif' major brand not found
+}
+
 
   /**
    * Validates the request's signature.

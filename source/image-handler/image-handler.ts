@@ -644,6 +644,8 @@ export class ImageHandler {
         return "raw";
       case ImageFormatTypes.GIF:
         return "gif";
+      case ImageFormatTypes.AVIF:
+        return "avif";
       default:
         throw new ImageHandlerError(
           StatusCodes.INTERNAL_SERVER_ERROR,
