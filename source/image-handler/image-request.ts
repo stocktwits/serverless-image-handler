@@ -757,35 +757,38 @@ public async getImageBytesUsingPuppeteer(imageUrl) {
    * @returns The output format.
    */
   public inferImageType(imageBuffer: Buffer): string {
-     // First, check if the image is AVIF
-     if (this.isAVIF(imageBuffer)) {
-      return ContentTypes.AVIF;
-    }
     const imageSignature = imageBuffer.slice(0, 4).toString("hex").toUpperCase();
     switch (imageSignature) {
-      case "89504E47":
-        return ContentTypes.PNG;
-      case "FFD8FFDB":
-      case "FFD8FFE0":
-      case "FFD8FFED":
-      case "FFD8FFEE":
-      case "FFD8FFE1":
-        return ContentTypes.JPEG;
-      case "52494646":
-        return ContentTypes.WEBP;
-      case "49492A00":
-      case "4D4D002A":
-        return ContentTypes.TIFF;
-      case "47494638":
-        return ContentTypes.GIF;
-      default:
-        throw new ImageHandlerError(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "RequestTypeError",
-          "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg). Refer to the documentation for additional guidance on forming image requests."
-        );
+        case "89504E47":
+            return ContentTypes.PNG;
+        case "FFD8FFDB":
+        case "FFD8FFE0":
+        case "FFD8FFED":
+        case "FFD8FFEE":
+        case "FFD8FFE1":
+            return ContentTypes.JPEG;
+        case "52494646":
+            return ContentTypes.WEBP;
+        case "49492A00":
+        case "4D4D002A":
+            return ContentTypes.TIFF;
+        case "47494638":
+            return ContentTypes.GIF;
+        // No default case here to allow further checks after the switch
     }
-  }
+
+    // Now, check for AVIF after the switch and before throwing an error
+    if (this.isAVIF(imageBuffer)) {
+        return ContentTypes.AVIF;
+    }
+
+    // If no known signature or AVIF is detected, throw an error
+    throw new ImageHandlerError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        "RequestTypeError",
+        "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg, avif). Refer to the documentation for additional guidance on forming image requests."
+    );
+}
 
   private  isAVIF(imageBuffer: Buffer): boolean {
     // Quick check for "ftypavif" in the beginning of the buffer
