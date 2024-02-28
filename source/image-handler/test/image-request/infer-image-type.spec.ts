@@ -49,7 +49,7 @@ describe("inferImageType", () => {
       expect(error.status).toEqual(500);
       expect(error.code).toEqual("RequestTypeError");
       expect(error.message).toEqual(
-        "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg). Refer to the documentation for additional guidance on forming image requests."
+        "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg, avif). Refer to the documentation for additional guidance on forming image requests."
       );
     }
   });

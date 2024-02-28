@@ -1383,4 +1383,56 @@ describe("setup", () => {
       expect(imageRequestInfo).toEqual(expectedResult);
     });
   });
+  describe("AVIFSupport", () => {
+    beforeAll(() => {
+      process.env.ENABLE_SIGNATURE = "No";
+      process.env.SOURCE_BUCKETS = "validBucket";
+    });
+    it("Return AVIF images", async () => {
+      // Arrange
+      const event = {
+        path: "/fit-in/100x100/filters:quality(80)/image.avif",
+      };
+  
+      const image = fs.readFileSync("./test/image/sample.avif");
+      const sharpInstance: Partial<Sharp> = {
+        metadata: jest.fn().mockResolvedValue({ width: 100, height: 100, size:1024}),
+      };
+    
+      ((sharp as unknown) as jest.Mock).mockReturnValue(sharpInstance);
+  
+      // Mock
+      mockAwsS3.getObject.mockImplementationOnce(() => ({
+        promise() {
+          return Promise.resolve({
+            ContentType: "image/avif",
+            Body: image
+          });
+        },
+      }));
+  
+      // Act
+      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const imageRequestInfo = await imageRequest.setup(event);
+      const expectedResult = {
+        requestType: "Thumbor",
+        bucket: "validBucket",
+        key: "image.avif",
+        edits: { resize: { width: 100, height: 100, fit: "inside" } },
+        originalImage: image,
+        headers: undefined,
+        cacheControl: "max-age=31536000,public",
+        contentType: "image/avif",
+      };
+  
+      // Assert
+      expect(mockAwsS3.getObject).toHaveBeenCalledWith({
+        Bucket: "validBucket",
+        Key: "image.avif",
+      });
+      expect(imageRequestInfo).toEqual(expectedResult);
+    });
+  });
 });
+
+
