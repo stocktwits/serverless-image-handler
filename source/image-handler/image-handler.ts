@@ -33,15 +33,12 @@ export class ImageHandler {
   // eslint-disable-next-line @typescript-eslint/ban-types
   private async instantiateSharpImage(originalImage: Buffer, edits: ImageEdits, options: Object): Promise<sharp.Sharp> {
     let image: sharp.Sharp = null;
-    image = sharp(originalImage, options);
-  
-    console.log("Options", options);
-    edits.rotate = 90;
-    console.log("edits.rotate", edits.rotate);
+
     if (edits.rotate !== undefined && edits.rotate === null) {
       image = sharp(originalImage, options);
     } else {
       const metadata = await sharp(originalImage, options).metadata();
+      console.log("metadata" + metadata);
       image = metadata.orientation
         ? sharp(originalImage, options).withMetadata({ orientation: metadata.orientation })
         : sharp(originalImage, options).withMetadata();
