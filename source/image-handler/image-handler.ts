@@ -40,7 +40,7 @@ export class ImageHandler {
       // Check if orientation is present and log it
       if (metadata.orientation) {
         console.log("Orientation: " + metadata.orientation);
-        this.setReverseRotation(edits, metadata.orientation);
+        this.setRotationFromOrientation(edits, metadata.orientation);
         image = sharp(originalImage, options).withMetadata({ orientation: metadata.orientation }); //This meta data is only for output purpose 
       } else {
         console.log("No orientation metadata found.");
@@ -83,6 +83,27 @@ export class ImageHandler {
             edits.rotate = 0; // Default case, no rotation
     }
 }
+
+private setRotationFromOrientation(edits: any, orientation: number): void {
+  switch (orientation) {
+      case 1: // Normal
+          edits.rotate = 0;
+          break;
+      case 3: // Rotated 180 degrees
+          edits.rotate = 180;
+          break;
+      case 6: // Rotated 90 degrees clockwise
+          edits.rotate = 90;
+          break;
+      case 8: // Rotated 270 degrees clockwise
+          edits.rotate = 270;
+          break;
+      default: // For orientations that involve flipping or are undefined
+          edits.rotate = 0; // Consider no rotation or implement flipping if needed
+          console.log("Orientation requires flipping or is undefined, rotation set to 0.");
+  }
+}
+
 
  
   
