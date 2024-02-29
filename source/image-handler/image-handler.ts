@@ -37,7 +37,7 @@ export class ImageHandler {
     console.log("edits.rotate", edits.rotate);
     console.log("Options", options);
     if (edits.rotate !== undefined && edits.rotate === null) {
-      image = sharp(originalImage, options);
+      image = sharp(originalImage, options).withMetadata({ orientation: 1 });
     } else {
       const metadata = await sharp(originalImage, options).metadata();
       image = metadata.orientation
