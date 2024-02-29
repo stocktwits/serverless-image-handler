@@ -34,10 +34,12 @@ export class ImageHandler {
   private async instantiateSharpImage(originalImage: Buffer, edits: ImageEdits, options: Object): Promise<sharp.Sharp> {
     let image: sharp.Sharp = null;
     image = sharp(originalImage, options);
-    console.log("edits.rotate", edits.rotate);
+  
     console.log("Options", options);
     if (edits.rotate !== undefined && edits.rotate === null) {
-      image = sharp(originalImage, options).rotate(-90);
+      edits.rotate = -90
+      console.log("edits.rotate", edits.rotate);
+      image = sharp(originalImage, options);
     } else {
       const metadata = await sharp(originalImage, options).metadata();
       image = metadata.orientation
