@@ -39,7 +39,7 @@ export class ImageHandler {
       const metadata = await sharp(originalImage, options).metadata();
       if (metadata.orientation) {
         console.log("Orientation: " + metadata.orientation);
-        image = sharp(originalImage, options).rotate().withMetadata({ orientation: metadata.orientation });
+        image = sharp(originalImage, options).rotate().withMetadata();
         //counterintuitive, but calling rotate() will reset the exif rotation , we will keep
         //meta data to pass the test
       } else {
