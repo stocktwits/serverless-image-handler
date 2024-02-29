@@ -39,8 +39,8 @@ export class ImageHandler {
       const metadata = await sharp(originalImage, options).metadata();
       if (metadata.orientation) {
         console.log("Orientation: " + metadata.orientation);
-        //this.setRotationFromOrientation(edits, metadata.orientation);// Reverse the orientation in edit
-        image = sharp(originalImage, options).rotate(); //this will cause sharp to ignore exif data 
+        image = sharp(originalImage, options).withMetadata({ orientation: metadata.orientation }).rotate(); //counterintuitive, but calling rotate() will reset the exif rotation , we will keep 
+        //meta data pass the test
       } else {
         console.log("No orientation metadata found.");
         image = sharp(originalImage, options).withMetadata();
@@ -49,31 +49,6 @@ export class ImageHandler {
 
     return image;
   }
-
-
-private setRotationFromOrientation(edits: any, orientation: number): void {
-  switch (orientation) {
-      case 1: // Normal
-          edits.rotate = 0;
-          break;
-      case 3: // Rotated 180 degrees
-          edits.rotate = 180;
-          break;
-      case 6: // Rotated 90 degrees clockwise
-          edits.rotate = 90;
-          break;
-      case 8: // Rotated 270 degrees clockwise
-          edits.rotate = 270;
-          break;
-      default: // For orientations that involve flipping or are undefined
-          edits.rotate = 0;
-          console.log("Orientation requires flipping or is undefined, rotation set to 0.");
-  }
-}
-
-
- 
-  
 
   /**
    * Modify an image's output format if specified
