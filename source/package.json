@@ -2,7 +2,7 @@
   "name": "source",
   "version": "6.1.1",
   "private": true,
-  "st-version": "1.4.4",
+  "st-version": "1.4.5",
   "description": "ESLint and prettier dependencies to be used within the solution",
   "license": "Apache-2.0",
   "author": "AWS Solutions",

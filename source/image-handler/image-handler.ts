@@ -33,14 +33,19 @@ export class ImageHandler {
   // eslint-disable-next-line @typescript-eslint/ban-types
   private async instantiateSharpImage(originalImage: Buffer, edits: ImageEdits, options: Object): Promise<sharp.Sharp> {
     let image: sharp.Sharp = null;
-
     if (edits.rotate !== undefined && edits.rotate === null) {
       image = sharp(originalImage, options);
     } else {
       const metadata = await sharp(originalImage, options).metadata();
-      image = metadata.orientation
-        ? sharp(originalImage, options).withMetadata({ orientation: metadata.orientation })
-        : sharp(originalImage, options).withMetadata();
+      if (metadata.orientation) {
+        console.log("Orientation: " + metadata.orientation);
+        image = sharp(originalImage, options).rotate().withMetadata();
+        //counterintuitive, but calling rotate() will reset the exif rotation , we will keep
+        //meta data to pass the test
+      } else {
+        console.log("No orientation metadata found.");
+        image = sharp(originalImage, options).withMetadata();
+      }
     }
 
     return image;
