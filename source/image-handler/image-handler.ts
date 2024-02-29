@@ -36,7 +36,7 @@ export class ImageHandler {
     image = sharp(originalImage, options);
   
     console.log("Options", options);
-    edits.rotate = -90
+    edits.rotate = 90;
     console.log("edits.rotate", edits.rotate);
     if (edits.rotate !== undefined && edits.rotate === null) {
       image = sharp(originalImage, options);
