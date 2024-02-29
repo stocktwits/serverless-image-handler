@@ -37,11 +37,10 @@ export class ImageHandler {
       image = sharp(originalImage, options);
     } else {
       const metadata = await sharp(originalImage, options).metadata();
-      // Check if orientation is present and log it
       if (metadata.orientation) {
         console.log("Orientation: " + metadata.orientation);
-        this.setRotationFromOrientation(edits, metadata.orientation);
-        image = sharp(originalImage, options).withMetadata({ orientation: metadata.orientation }); //This meta data is only for output purpose 
+        //this.setRotationFromOrientation(edits, metadata.orientation);// Reverse the orientation in edit
+        image = sharp(originalImage, options).rotate(); //this will cause sharp to ignore exif data 
       } else {
         console.log("No orientation metadata found.");
         image = sharp(originalImage, options).withMetadata();
@@ -51,38 +50,6 @@ export class ImageHandler {
     return image;
   }
 
-  private setReverseRotation(edits: ImageEdits, orientation: number): void {
-    switch (orientation) {
-        case 1:
-            edits.rotate = 0; // No rotation needed
-            break;
-        case 2:
-            // For horizontal flip, we don't adjust rotation; this case is handled here for completeness
-            edits.rotate = 0;
-            break;
-        case 3:
-            edits.rotate = 180; // Reverse of 180 is 180
-            break;
-        case 4:
-            // For vertical flip, we don't adjust rotation; this case is handled here for completeness
-            edits.rotate = 0;
-            break;
-        case 5:
-            edits.rotate = 90; // Reverse of transposed (270 rotated then flipped) is 90
-            break;
-        case 6:
-            edits.rotate = 270; // Reverse of 90 degrees clockwise is 270 degrees
-            break;
-        case 7:
-            edits.rotate = 90; // Reverse of transverse (90 rotated then flipped) is 270, but considering rotation only
-            break;
-        case 8:
-            edits.rotate = 90; // Reverse of 270 degrees clockwise is 90 degrees
-            break;
-        default:
-            edits.rotate = 0; // Default case, no rotation
-    }
-}
 
 private setRotationFromOrientation(edits: any, orientation: number): void {
   switch (orientation) {
@@ -99,7 +66,7 @@ private setRotationFromOrientation(edits: any, orientation: number): void {
           edits.rotate = 270;
           break;
       default: // For orientations that involve flipping or are undefined
-          edits.rotate = 0; // Consider no rotation or implement flipping if needed
+          edits.rotate = 0;
           console.log("Orientation requires flipping or is undefined, rotation set to 0.");
   }
 }
